@@ -59,9 +59,17 @@
 
     private async Task SpeakText(string speakLanguage)
     {
-        // Wywołanie JS, który użyje Web Speech API (speechSynthesis)
-        await JSRuntime.InvokeVoidAsync("speechSynthesisInterop.speak", textToSpeak, speakLanguage);
+        try
+        {
+            // Wywołanie JS z czekaniem na zakończenie odtwarzania
+            await JSRuntime.InvokeVoidAsync("speechSynthesisInterop.speak", textToSpeak, speakLanguage);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd podczas odtwarzania tekstu: {ex.Message}");
+        }
     }
+
 
     private string? fileName;
 
@@ -129,9 +137,30 @@
                 await SpeakText(speakLanguage);
 
                 // Czekaj 10 sekund
-                await Task.Delay(500, token);
                 await JSRuntime.InvokeVoidAsync("playSound", "./Assets/waiting-for-response.mp3");
+                await Task.Delay(300, token);
                 StartListening(listenLanguage);
+                await Task.Delay(5000, token);
+
+                //Console.WriteLine(recognizedText.Substring(0, recognizedText.Length - 1));
+                //Console.WriteLine(randomPair.BackSide);
+                if (recognizedText.Substring(0, recognizedText.Length - 1).ToLower() == "stop")
+                {
+                    throw new TaskCanceledException();
+                }
+                if (recognizedText.Substring(0, recognizedText.Length - 1).ToLower() == randomPair.BackSide.ToLower())
+                {
+                    await JSRuntime.InvokeVoidAsync("playSound", "./Assets/good-answer.mp3");
+                }
+                else
+                {
+                    await JSRuntime.InvokeVoidAsync("playSound", "./Assets/wrong-answer.mp3");
+                    await Task.Delay(500);
+                    textToSpeak = randomPair.BackSide;
+                    await SpeakText(listenLanguage);
+                }
+
+
                 await Task.Delay(2000, token);
             }
         }

@@ -72,3 +72,29 @@ window.saveFileWithPicker = async (content, mimeType) => {
         console.error('Błąd zapisu pliku:', err);
     }
 };
+
+window.speechSynthesisInterop = {
+    speak: (text, lang) => {
+        return new Promise((resolve, reject) => {
+            if (!window.speechSynthesis) {
+                reject("Speech Synthesis API nie jest wspierane.");
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+
+            utterance.onend = () => {
+                console.log("Odtwarzanie zakończone.");
+                resolve(); // Zwróć sukces, gdy mowa się zakończy
+            };
+
+            utterance.onerror = (event) => {
+                console.error("Błąd podczas odtwarzania:", event);
+                reject(event.error); // Zwróć błąd w przypadku problemów
+            };
+
+            window.speechSynthesis.speak(utterance);
+        });
+    }
+};
