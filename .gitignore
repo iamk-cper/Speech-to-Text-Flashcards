@@ -1,0 +1,19 @@
+# Ignorowanie folderów kompilacji
+bin/
+obj/
+
+# Ignorowanie folderu Visual Studio
+.vs/
+
+# Ignorowanie plików użytkownika
+*.user
+*.suo
+git
+
+# Ignorowanie zależności (jeśli używasz npm lub bower)
+node_modules/
+wwwroot/lib/
+
+# Ignorowanie plików systemowych
+.DS_Store
+Thumbs.db

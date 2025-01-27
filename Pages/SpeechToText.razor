@@ -1,0 +1,25 @@
+﻿@page "/"
+@inject IJSRuntime JSRuntime
+
+<h3>Rozpoznawanie mowy</h3>
+
+<p>Tekst: @recognizedText</p>
+
+<button @onclick="StartListening">Słuchaj</button>
+
+@code {
+    private string recognizedText = "Oczekiwanie na tekst...";
+
+    private async Task StartListening()
+    {
+        var dotNetReference = DotNetObjectReference.Create(this);
+        await JSRuntime.InvokeVoidAsync("speechRecognitionInterop.startListening", dotNetReference, "pl-PL");
+    }
+
+    [JSInvokable]
+    public void ProcessSpeech(string transcript)
+    {
+        recognizedText = transcript;
+        StateHasChanged();
+    }
+}
