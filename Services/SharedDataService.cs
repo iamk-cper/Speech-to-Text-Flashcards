@@ -61,29 +61,58 @@ public class SharedDataService
     {
         foreach (var pair in Pairs)
         {
-            pair.Priority = 0;
+            pair.Priority = 1;
         }
     }
     public void AddPriority(FlashcardPair pair)
     {
-        var count = Pairs.Count;
-        // Dodajemy 0.2 * liczbaFISZEK
-        pair.Priority += 0.20 * count;
+        pair.Priority += 1;
     }
 
     public void SubtractPriority(FlashcardPair pair)
     {
         var count = Pairs.Count;
-        // Odejmujemy 0.1 * liczbaFISZEK
-        pair.Priority -= 0.05 * count;
-        if (pair.Priority < 0)
-            pair.Priority = 0;
+        pair.Priority -= 0.5;
+        if (pair.Priority < 1)
+            pair.Priority = 1;
+    }
+
+    public void SubstractAll()
+    {
+        foreach (var pair in Pairs)
+        {
+            pair.Priority -= 0.10;
+            if (pair.Priority < 1)
+                pair.Priority = 1;
+        }
     }
 
     public class FlashcardPair
     {
         public string FrontSide { get; set; } = "";
         public string BackSide { get; set; } = "";
-        public double Priority { get; set; } = 0;  // nowe pole
+        public double Priority { get; set; } = 1;  // nowe pole
+    }
+
+    public FlashcardPair GetRandomPairByPriority()
+    {
+        double totalPriority = Pairs.Sum(pair => pair.Priority);
+
+        var rand = new Random();
+        double randomValue = rand.NextDouble() * totalPriority;
+
+        // Znajdź parę odpowiadającą wylosowanej wartości
+        double cumulativePriority = 0;
+        foreach (var pair in Pairs)
+        {
+            cumulativePriority += pair.Priority;
+            if (randomValue <= cumulativePriority)
+            {
+                return pair;
+            }
+        }
+
+        // W razie błędu zwróć ostatnią parę (nie powinno wystąpić)
+        return Pairs.Last();
     }
 }

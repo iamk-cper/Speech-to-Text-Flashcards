@@ -3,7 +3,7 @@
 @inject IJSRuntime JSRuntime
 @inject SharedDataService SharedDataService
 
-<h3>Fiszki</h3>
+<h2 class="center mb-3">Fiszki</h2>
 <!-- Sekcja: Wybór pliku XML -->
 <InputFile OnChange="OnFileSelected" />
 
@@ -14,19 +14,23 @@
 
 @if (SharedDataService.Pairs.Count > 0)
 {
-    <h5 class="mt-3">Załadowany plik: @SharedDataService.FileName</h5>
+    <h6 class="mt-3">Załadowany plik: @SharedDataService.FileName</h6>
 
-    <h4>Rozpoznawanie mowy</h4>
-    <p>Tekst: @recognizedText</p>
-    <input @bind="listenLanguage" placeholder="Wpisz kod języka (np. en-US)" style="width:300px;" />
+    <h4 class="mt-4 mb-1 center">Rozpoznawanie mowy</h4>
+    <div class="center">
+        <h6>Tekst: @recognizedText</h6>
+        <input @bind="listenLanguage" placeholder="Wpisz kod języka (np. en-US)" style="width:300px;" />
+    </div>
 
-    <h4>Język fiszek</h4>
-    <div class="mb-2">
+    <h4 class="center mt-3">Język fiszek</h4>
+    <div class="mb-2 center">
         <input @bind="speakLanguage" placeholder="Wpisz kod języka (np. en-US)" style="width:300px;" />
     </div>
 
-    <button class="btn btn-success" @onclick="() => StartRandomMode(listenLanguage)" disabled="@isRandomModeRunning">Start</button>
-    <button class="btn btn-danger" @onclick="StopRandomMode" disabled="@(!isRandomModeRunning)">Zatrzymaj</button>
+    <div class="center mt-2">
+        <button class="btn btn-success" @onclick="() => StartRandomMode(listenLanguage)" disabled="@isRandomModeRunning">Start</button>
+        <button class="btn btn-danger" @onclick="StopRandomMode" disabled="@(!isRandomModeRunning)">Zatrzymaj</button>
+    </div>
 }
 
 @code {
@@ -92,12 +96,10 @@
 
         try
         {
-            var rand = new Random();
             while (!token.IsCancellationRequested)
             {
-                // Losujemy parę
-                var randomIndex = rand.Next(SharedDataService.Pairs.Count);
-                var randomPair = SharedDataService.Pairs[randomIndex];
+
+                var randomPair = SharedDataService.GetRandomPairByPriority();
 
                 // Mówimy front
                 textToSpeak = randomPair.FrontSide;
@@ -136,10 +138,7 @@
                 counter++;
                 if (counter % (SharedDataService.Pairs.Count() / 10 + 1) == 0)
                 {
-                    foreach (var pair in SharedDataService.Pairs)
-                    {
-                        SharedDataService.SubtractPriority(pair);
-                    }
+                    SharedDataService.SubstractAll();
                 }
 
                 await Task.Delay(2000, token);

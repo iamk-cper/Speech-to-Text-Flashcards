@@ -3,7 +3,7 @@
 @inject IJSRuntime JSRuntime
 @inject SharedDataService SharedDataService
 
-<h3>Wczytywanie i zapisywanie pliku XML (lokalnie przez u¿ytkownika)</h3>
+<h2 class="center mb-3">Wczytywanie i zapisywanie pliku XML</h2>
 
 <!-- Sekcja: Wybór pliku XML -->
 <InputFile OnChange="OnFileSelected" />
@@ -15,37 +15,38 @@
 
 @if (SharedDataService.Pairs.Count > 0)
 {
-    <h5 class="mt-3">Za³adowany plik: @SharedDataService.FileName</h5>
-    <h5 class="mt-4">Lista za³adowanych par:</h5>
-    <ul>
+    <h6 class="mt-3">Za³adowany plik: @SharedDataService.FileName</h6>
+    <h4 class="mt-4 bm-2 center">Lista za³adowanych par:</h4>
+    <div class="center" style="display: flex; flex-direction: column; align-items: center;">
         @foreach (var pair in SharedDataService.Pairs)
         {
-            <li>
+            <div class="mt-1" style="width: 60%; text-align: left; display: flex; align-items: center; gap: 0.5rem;">
                 <button class="btn btn-sm btn-danger ms-2" @onclick="() => RemovePair(pair)">X</button>
-                @pair.FrontSide - @pair.BackSide
-                (<strong>Priority:</strong> @($"{pair.Priority:F2}"))
-
-            </li>
+                <span>@pair.FrontSide - @pair.BackSide (<strong>Priority:</strong> @($"{pair.Priority:F2}"))</span>
+            </div>
         }
-    </ul>
+    </div>
 }
 
 <!-- Sekcja: Dodawanie nowej pary -->
-<div class="mt-3">
+<div class="mt-2 center">
     <input @bind="newFront" placeholder="Wpisz front-side..." />
     <input @bind="newBack" placeholder="Wpisz back-side..." />
     <button class="btn btn-info" @onclick="AddPair">Dodaj parê</button>
 </div>
 
+
 @if (SharedDataService.Pairs.Count > 0)
 {
-    <button class="btn btn-warning" @onclick="ResetPriorities">
-        Zresetuj priorytety
-    </button>
+    <div class="mt-4 center">
+        <button class="btn btn-warning" @onclick="ResetPriorities">
+            Zresetuj priorytety
+        </button>
 
-    <button class="btn btn-success mt-3" @onclick="SaveToXml">
-        Pobierz zmodyfikowany plik XML
-    </button>
+        <button class="btn btn-success" @onclick="SaveToXml">
+            Pobierz zmodyfikowany plik XML
+        </button>
+    </div>
 }
 
 @code {
@@ -74,7 +75,7 @@
                 {
                     FrontSide = newFront,
                     BackSide = newBack,
-                    Priority = 0
+                    Priority = 1
                 });
 
             newFront = "";
@@ -98,4 +99,5 @@
         var xmlString = SharedDataService.GetXmlFromPairs();
         await JSRuntime.InvokeVoidAsync("saveFileWithPicker", xmlString, "application/xml");
     }
+
 }
