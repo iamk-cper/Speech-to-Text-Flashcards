@@ -10,13 +10,12 @@
 
 @if (!string.IsNullOrEmpty(fileName))
 {
-    SharedDataService.fileName = fileName;
+    SharedDataService.FileName = fileName;
 }
 
-<!-- Sekcja: Lista par wczytanych z pliku -->
 @if (SharedDataService.Pairs.Count > 0)
 {
-    <h5 class="mt-3">Za³adowany plik: @SharedDataService.fileName</h5>
+    <h5 class="mt-3">Za³adowany plik: @SharedDataService.FileName</h5>
     <h5 class="mt-4">Lista za³adowanych par:</h5>
     <ul>
         @foreach (var pair in SharedDataService.Pairs)
@@ -36,10 +35,11 @@
     <button class="btn btn-info" @onclick="AddPair">Dodaj parê</button>
 </div>
 
-<!-- Sekcja: Zapisywanie do pliku -->
 @if (SharedDataService.Pairs.Count > 0)
 {
-    <button class="btn btn-success mt-3" @onclick="SaveToXml">Pobierz zmodyfikowany plik XML</button>
+    <button class="btn btn-success mt-3" @onclick="SaveToXml">
+        Pobierz zmodyfikowany plik XML
+    </button>
 }
 
 @code {
@@ -53,40 +53,11 @@
         if (file == null) return;
 
         fileName = file.Name;
-
         using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
         using var reader = new StreamReader(stream);
         var xmlContent = await reader.ReadToEndAsync();
 
-        LoadPairsFromXml(xmlContent);
-    }
-
-    private void LoadPairsFromXml(string xml)
-    {
-        SharedDataService.Pairs.Clear();
-
-        try
-        {
-            var xdoc = XDocument.Parse(xml);
-            foreach (var el in xdoc.Descendants("pair"))
-            {
-                var front = el.Element("front")?.Value;
-                var back = el.Element("back")?.Value;
-
-                if (!string.IsNullOrEmpty(front) && !string.IsNullOrEmpty(back))
-                {
-                    SharedDataService.Pairs.Add(new SharedDataService.FlashcardPair
-                    {
-                        FrontSide = front,
-                        BackSide = back
-                    });
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("B³¹d parsowania XML: " + ex.Message);
-        }
+        SharedDataService.LoadPairsFromXml(xmlContent);
     }
 
     private void AddPair()
@@ -94,10 +65,10 @@
         if (!string.IsNullOrWhiteSpace(newFront) && !string.IsNullOrWhiteSpace(newBack))
         {
             SharedDataService.Pairs.Add(new SharedDataService.FlashcardPair
-            {
-                FrontSide = newFront,
-                BackSide = newBack
-            });
+                {
+                    FrontSide = newFront,
+                    BackSide = newBack
+                });
 
             newFront = "";
             newBack = "";
@@ -111,17 +82,7 @@
 
     private async Task SaveToXml()
     {
-        var xdoc = new XDocument(
-            new XElement("pairs",
-                from p in SharedDataService.Pairs
-                select new XElement("pair",
-                    new XElement("front", p.FrontSide),
-                    new XElement("back", p.BackSide)
-                )
-            )
-        );
-
-        var xmlString = xdoc.ToString();
-        await JSRuntime.InvokeVoidAsync("saveFileWithPicker", xmlString);
+        var xmlString = SharedDataService.GetXmlFromPairs();
+        await JSRuntime.InvokeVoidAsync("saveFileWithPicker", xmlString, "application/xml");
     }
 }

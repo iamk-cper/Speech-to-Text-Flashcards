@@ -19,29 +19,29 @@
 };
 
 window.speechSynthesisInterop = {
-    speak: function (text, lang) {
-        if (!('speechSynthesis' in window)) {
-            alert("Ta przeglądarka nie wspiera Speech Synthesis.");
-            return;
-        }
-        let utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = lang;
-        speechSynthesis.speak(utterance);
+    speak: (text, lang) => {
+        return new Promise((resolve, reject) => {
+            if (!window.speechSynthesis) {
+                reject("Speech Synthesis API nie jest wspierane.");
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+
+            utterance.onend = () => {
+                console.log("Odtwarzanie zakończone.");
+                resolve();
+            };
+
+            utterance.onerror = (event) => {
+                console.error("Błąd podczas odtwarzania:", event);
+                reject(event.error);
+            };
+
+            window.speechSynthesis.speak(utterance);
+        });
     }
-};
-
-window.downloadFileFromText = (filename, text) => {
-    // Tworzymy blob z tekstem XML
-    const blob = new Blob([text], { type: 'text/xml' });
-    const link = document.createElement('a');
-    link.download = filename;
-
-    // Tworzymy URL do bloba
-    link.href = URL.createObjectURL(blob);
-    link.click();
-
-    // Zwolnienie zasobów
-    URL.revokeObjectURL(link.href);
 };
 
 window.saveFileWithPicker = async (content, mimeType) => {
@@ -60,7 +60,7 @@ window.saveFileWithPicker = async (content, mimeType) => {
             await writable.write(new Blob([content], { type: mimeType }));
             await writable.close();
         } else {
-            // Dla przeglądarek bez obsługi `showSaveFilePicker`
+            // Dla starszych przeglądarek
             const blob = new Blob([content], { type: mimeType });
             const link = document.createElement('a');
             link.download = 'data.xml';
@@ -70,31 +70,5 @@ window.saveFileWithPicker = async (content, mimeType) => {
         }
     } catch (err) {
         console.error('Błąd zapisu pliku:', err);
-    }
-};
-
-window.speechSynthesisInterop = {
-    speak: (text, lang) => {
-        return new Promise((resolve, reject) => {
-            if (!window.speechSynthesis) {
-                reject("Speech Synthesis API nie jest wspierane.");
-                return;
-            }
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang;
-
-            utterance.onend = () => {
-                console.log("Odtwarzanie zakończone.");
-                resolve(); // Zwróć sukces, gdy mowa się zakończy
-            };
-
-            utterance.onerror = (event) => {
-                console.error("Błąd podczas odtwarzania:", event);
-                reject(event.error); // Zwróć błąd w przypadku problemów
-            };
-
-            window.speechSynthesis.speak(utterance);
-        });
     }
 };
