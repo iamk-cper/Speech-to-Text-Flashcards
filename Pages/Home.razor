@@ -37,6 +37,7 @@
     private string speakLanguage = "";
     private string textToSpeak = "";
     private string? fileName;
+    private bool useFlashcardHistory = false;
 
     private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
@@ -87,6 +88,7 @@
         StateHasChanged();
         randomModeCancellationTokenSource = new CancellationTokenSource();
         var token = randomModeCancellationTokenSource.Token;
+        int counter = 0;
 
         try
         {
@@ -119,14 +121,24 @@
                     if (trimmed == randomPair.BackSide.ToLower())
                     {
                         await JSRuntime.InvokeVoidAsync("playSound", "./Assets/good-answer.mp3");
+                        SharedDataService.SubtractPriority(randomPair);
                     }
                     else
                     {
                         await JSRuntime.InvokeVoidAsync("playSound", "./Assets/wrong-answer.mp3");
                         await Task.Delay(500, token);
-                        // Mówimy poprawną odpowiedź
+                        SharedDataService.AddPriority(randomPair);
                         textToSpeak = randomPair.BackSide;
                         await SpeakText(language);
+                    }
+                }
+
+                counter++;
+                if (counter % (SharedDataService.Pairs.Count() / 10 + 1) == 0)
+                {
+                    foreach (var pair in SharedDataService.Pairs)
+                    {
+                        SharedDataService.SubtractPriority(pair);
                     }
                 }
 
@@ -140,8 +152,7 @@
         finally
         {
             await JSRuntime.InvokeVoidAsync("playSound", "./Assets/stop.mp3");
-            isRandomModeRunning = false;
-            StateHasChanged();
+            StopRandomMode();
         }
     }
 
