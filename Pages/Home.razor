@@ -4,8 +4,9 @@
 @inject SharedDataService SharedDataService
 
 <h2 class="center mb-3">Fiszki</h2>
-<!-- Sekcja: Wybór pliku XML -->
+
 <InputFile OnChange="OnFileSelected" />
+
 
 @if (!string.IsNullOrEmpty(fileName))
 {
@@ -74,7 +75,6 @@
     {
         try
         {
-            // Wywołanie JS z czekaniem na zakończenie odtwarzania
             await JSRuntime.InvokeVoidAsync("speechSynthesisInterop.speak", textToSpeak, language);
         }
         catch (Exception ex)
@@ -101,17 +101,14 @@
 
                 var randomPair = SharedDataService.GetRandomPairByPriority();
 
-                // Mówimy front
                 textToSpeak = randomPair.FrontSide;
                 await SpeakText(speakLanguage);
 
-                // "Czekamy" - i w tym czasie user mówi
                 await JSRuntime.InvokeVoidAsync("playSound", "./Assets/waiting-for-response.mp3");
-                await Task.Delay(300, token); // krótka pauza przed nasłuchem
+                await Task.Delay(300, token);
                 await StartListening(language);
                 await Task.Delay(5000, token);
 
-                // Bezpieczny substring check
                 if (recognizedText.Length > 1)
                 {
                     var trimmed = recognizedText.Substring(0, recognizedText.Length - 1).ToLower();

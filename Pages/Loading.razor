@@ -7,8 +7,8 @@
 
 <Popup Message="@popupMessage" OnClose="HidePopup" />
 
-<!-- Sekcja: Wybór pliku XML -->
 <InputFile OnChange="OnFileSelected" />
+
 
 @if (!string.IsNullOrEmpty(fileName))
 {
@@ -30,7 +30,6 @@
     </div>
 }
 
-<!-- Sekcja: Dodawanie nowej pary -->
 <div class="mt-2 mb-4 center">
     <input @bind="newFront" placeholder="Wpisz front-side..." />
     <input @bind="newBack" placeholder="Wpisz back-side..." />
@@ -67,31 +66,31 @@
     private void OnPairAdded(SharedDataService.FlashcardPair pair)
     {
         ShowPopup($"Dodano fiszkê: {pair.FrontSide} - {pair.BackSide}");
-        StateHasChanged(); // Odœwie¿enie widoku
+        StateHasChanged();
     }
 
     private void OnPairRemoved(SharedDataService.FlashcardPair pair)
     {
         ShowPopup($"Usuniêto fiszkê: {pair.FrontSide} - {pair.BackSide}");
-        StateHasChanged(); // Odœwie¿enie widoku
+        StateHasChanged();
     }
 
     private void OnPriorityReset()
     {
         ShowPopup("Priorytety zosta³y zresetowane.");
-        StateHasChanged(); // Odœwie¿enie widoku
+        StateHasChanged();
     }
 
     private void ShowPopup(string message)
     {
-        popupMessage = message; // Ustaw treœæ popupa
-        StateHasChanged(); // Odœwie¿ widok
+        popupMessage = message;
+        StateHasChanged();
     }
 
     private void HidePopup()
     {
-        popupMessage = null; // Ukryj popup
-        StateHasChanged(); // Odœwie¿ widok
+        popupMessage = null;
+        StateHasChanged();
     }
 
     private async Task OnFileSelected(InputFileChangeEventArgs e)

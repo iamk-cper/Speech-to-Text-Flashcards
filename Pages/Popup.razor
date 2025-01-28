@@ -7,16 +7,15 @@
 
 @code {
     [Parameter] public string? Message { get; set; }
-    [Parameter] public int Duration { get; set; } = 5000; // Domyślny czas wyświetlania w ms
+    [Parameter] public int Duration { get; set; } = 5000; 
     [Parameter] public EventCallback OnClose { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
         if (!string.IsNullOrEmpty(Message))
         {
-            // Czekaj przez określony czas
             await Task.Delay(Duration);
-            await OnClose.InvokeAsync(); // Zgłoś zdarzenie zamknięcia
+            await OnClose.InvokeAsync();
         }
     }
 }

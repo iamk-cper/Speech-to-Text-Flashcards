@@ -15,13 +15,13 @@ public class SharedDataService
     public void AddPair(FlashcardPair pair)
     {
         Pairs.Add(pair);
-        PairAdded?.Invoke(pair); // Wywołanie eventu po dodaniu
+        PairAdded?.Invoke(pair);
     }
 
     public void RemovePair(FlashcardPair pair)
     {
         Pairs.Remove(pair);
-        PairRemoved?.Invoke(pair); // Wywołanie eventu po usunięciu
+        PairRemoved?.Invoke(pair);
     }
 
     public void LoadPairsFromXml(string xml)
@@ -34,9 +34,9 @@ public class SharedDataService
             {
                 var front = el.Element("front")?.Value;
                 var back = el.Element("back")?.Value;
-
                 var priorityString = el.Element("priority")?.Value;
-                double priority = 0;
+
+                double priority = 1;
                 if (!string.IsNullOrEmpty(priorityString))
                 {
                     double.TryParse(priorityString, out priority);
@@ -47,8 +47,7 @@ public class SharedDataService
                     Pairs.Add(new FlashcardPair
                     {
                         FrontSide = front,
-                        BackSide = back,
-                        Priority = priority
+                        BackSide = back
                     });
                 }
             }
@@ -109,7 +108,7 @@ public class SharedDataService
     {
         public string FrontSide { get; set; } = "";
         public string BackSide { get; set; } = "";
-        public double Priority { get; set; } = 1;  // nowe pole
+        public double Priority { get; set; } = 1;
     }
 
     public FlashcardPair GetRandomPairByPriority()
@@ -119,7 +118,6 @@ public class SharedDataService
         var rand = new Random();
         double randomValue = rand.NextDouble() * totalPriority;
 
-        // Znajdź parę odpowiadającą wylosowanej wartości
         double cumulativePriority = 0;
         foreach (var pair in Pairs)
         {
@@ -130,7 +128,7 @@ public class SharedDataService
             }
         }
 
-        // W razie błędu zwróć ostatnią parę (nie powinno wystąpić)
+        // error return (shoudn't happen)
         return Pairs.Last();
     }
 }
