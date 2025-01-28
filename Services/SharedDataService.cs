@@ -4,8 +4,25 @@ using System.Xml.Linq;
 
 public class SharedDataService
 {
+    public event Action<FlashcardPair>? PairAdded;
+    public event Action<FlashcardPair>? PairRemoved;
+    public event Action? PriorityReset;
+
     public List<FlashcardPair> Pairs { get; set; } = new();
     public string FileName { get; set; } = "";
+
+
+    public void AddPair(FlashcardPair pair)
+    {
+        Pairs.Add(pair);
+        PairAdded?.Invoke(pair); // Wywołanie eventu po dodaniu
+    }
+
+    public void RemovePair(FlashcardPair pair)
+    {
+        Pairs.Remove(pair);
+        PairRemoved?.Invoke(pair); // Wywołanie eventu po usunięciu
+    }
 
     public void LoadPairsFromXml(string xml)
     {
@@ -63,6 +80,7 @@ public class SharedDataService
         {
             pair.Priority = 1;
         }
+        PriorityReset?.Invoke();
     }
     public void AddPriority(FlashcardPair pair)
     {

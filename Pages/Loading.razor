@@ -5,6 +5,8 @@
 
 <h2 class="center mb-3">Wczytywanie i zapisywanie pliku XML</h2>
 
+<Popup Message="@popupMessage" OnClose="HidePopup" />
+
 <!-- Sekcja: Wybór pliku XML -->
 <InputFile OnChange="OnFileSelected" />
 
@@ -29,7 +31,7 @@
 }
 
 <!-- Sekcja: Dodawanie nowej pary -->
-<div class="mt-2 center">
+<div class="mt-2 mb-4 center">
     <input @bind="newFront" placeholder="Wpisz front-side..." />
     <input @bind="newBack" placeholder="Wpisz back-side..." />
     <button class="btn btn-info" @onclick="AddPair">Dodaj parê</button>
@@ -53,6 +55,44 @@
     private string newFront = "";
     private string newBack = "";
     private string? fileName;
+    private string? popupMessage;
+
+    protected override void OnInitialized()
+    {
+        SharedDataService.PairAdded += OnPairAdded;
+        SharedDataService.PairRemoved += OnPairRemoved;
+        SharedDataService.PriorityReset += OnPriorityReset;
+    }
+
+    private void OnPairAdded(SharedDataService.FlashcardPair pair)
+    {
+        ShowPopup($"Dodano fiszkê: {pair.FrontSide} - {pair.BackSide}");
+        StateHasChanged(); // Odœwie¿enie widoku
+    }
+
+    private void OnPairRemoved(SharedDataService.FlashcardPair pair)
+    {
+        ShowPopup($"Usuniêto fiszkê: {pair.FrontSide} - {pair.BackSide}");
+        StateHasChanged(); // Odœwie¿enie widoku
+    }
+
+    private void OnPriorityReset()
+    {
+        ShowPopup("Priorytety zosta³y zresetowane.");
+        StateHasChanged(); // Odœwie¿enie widoku
+    }
+
+    private void ShowPopup(string message)
+    {
+        popupMessage = message; // Ustaw treœæ popupa
+        StateHasChanged(); // Odœwie¿ widok
+    }
+
+    private void HidePopup()
+    {
+        popupMessage = null; // Ukryj popup
+        StateHasChanged(); // Odœwie¿ widok
+    }
 
     private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
@@ -71,7 +111,7 @@
     {
         if (!string.IsNullOrWhiteSpace(newFront) && !string.IsNullOrWhiteSpace(newBack))
         {
-            SharedDataService.Pairs.Add(new SharedDataService.FlashcardPair
+            SharedDataService.AddPair(new SharedDataService.FlashcardPair
                 {
                     FrontSide = newFront,
                     BackSide = newBack,
@@ -85,7 +125,7 @@
 
     private void RemovePair(SharedDataService.FlashcardPair pair)
     {
-        SharedDataService.Pairs.Remove(pair);
+        SharedDataService.RemovePair(pair);
     }
 
     private void ResetPriorities()

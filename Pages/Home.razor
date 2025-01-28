@@ -27,7 +27,7 @@
         <input @bind="speakLanguage" placeholder="Wpisz kod języka (np. en-US)" style="width:300px;" />
     </div>
 
-    <div class="center mt-2">
+    <div class="center mt-2 mb-4">
         <button class="btn btn-success" @onclick="() => StartRandomMode(listenLanguage)" disabled="@isRandomModeRunning">Start</button>
         <button class="btn btn-danger" @onclick="StopRandomMode" disabled="@(!isRandomModeRunning)">Zatrzymaj</button>
     </div>
